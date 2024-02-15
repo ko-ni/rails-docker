@@ -1,0 +1,42 @@
+# Docker Composeのバージョンを指定する
+version: '3'
+
+# serviece以下に各コンテナの設定を記述する
+services:
+
+  # webコンテナの設定
+  web:
+    # カレントディレクトリのDockerfileでビルドする
+    build: 
+       context: .
+       dockerfile: Dockerfile.dev
+    # ポートの設定を行う(ホストの3000ポートとコンテナの3000ポートを紐付け)
+    ports:
+      - '3000:3000'
+    # マウントの設定を行う(カレントディレクトリのファイル・フォルダをmyappにマウントする)
+    volumes:
+      - .:/myapp
+    # 環境変数の設定を行う
+    environment:
+      - 'DATABASE_PASSWORD=postgres'
+    # 擬似端末(キーボードによる入力)をコンテナに結びつける
+    tty: true
+    # 標準入出力とエラー出力をコンテナと結びつける
+    stdin_open: true
+    # コンテナの依存関係を指定する
+    depends_on:
+      - 'db'
+
+  # データベースコンテナの設定
+  db:
+    # postgresの12.0を指定する
+    image: postgres:12.0
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+
+volumes:
+  db-data:
+    driver: local

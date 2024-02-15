@@ -1,0 +1,24 @@
+# ベースとなるイメージを指定する
+FROM node:latest as node
+FROM ruby:3.2.2
+
+# aptを更新し、postgresql等の必要なパッケージをインストールする
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    postgresql-client
+
+# myappというフォルダを作成し、myappをワークディレクトリとする
+RUN mkdir /myapp
+WORKDIR /myapp
+
+# yarnを更新する
+# RUN yarn install
+
+# Gemをインストールする
+COPY Gemfile /myapp/Gemfile
+COPY Gemfile.lock /myapp/Gemfile.lock
+RUN bundle install && bundle update --bundler
+
+# カレントディレクトリをmyappにコピーする
+COPY . /myapp
